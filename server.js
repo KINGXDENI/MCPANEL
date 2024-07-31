@@ -16,7 +16,7 @@ const io = socketIo(server);
 
 const RCON_HOST = 'localhost';
 const RCON_PORT = 25575;
-const RCON_PASSWORD = 'your-rcon-password';
+const RCON_PASSWORD = '123dendut';
 
 app.use(express.static(path.join(__dirname, 'public')));
 
