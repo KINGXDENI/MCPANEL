@@ -40,6 +40,11 @@
             border-radius: 0;
             /* Remove border radius for better alignment with input */
         }
+
+        .status-output {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -69,6 +74,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2><i class="fas fa-cogs"></i> Server Controls</h2>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-success" onclick="controlServer('start')">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button class="btn btn-danger" onclick="controlServer('stop')">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button class="btn btn-warning" onclick="controlServer('restart')">
+                    <i class="fas fa-redo"></i> Restart
+                </button>
+                <div id="server-status" class="status-output mt-3">
+                    Checking server status...
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap Bundle with Popper -->
@@ -94,12 +119,24 @@
             logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom
         });
 
+        // Update server status
+        socket.on('server-status', (status) => {
+            document.getElementById('server-status').textContent = `Server is ${status}`;
+        });
+
         function sendCommand() {
             const command = document.getElementById('command-input').value;
             if (command.trim() === '') return; // Do nothing if input is empty
             socket.emit('rcon-command', command);
             document.getElementById('command-input').value = ''; // Clear input field
         }
+
+        function controlServer(action) {
+            socket.emit('server-control', action);
+        }
+
+        // Check server status on load
+        socket.emit('check-server-status');
     </script>
 </body>
 

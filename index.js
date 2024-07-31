@@ -9,6 +9,9 @@ const {
 const {
     exec
 } = require('child_process');
+const {
+    execSync
+} = require('child_process');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,8 +21,21 @@ const RCON_HOST = 'localhost';
 const RCON_PORT = 25575;
 const RCON_PASSWORD = '123dendut';
 
+// Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Check server status
+function getServerStatus(callback) {
+    exec('sudo systemctl is-active minecraft', (error, stdout) => {
+        if (error) {
+            callback('unknown');
+            return;
+        }
+        callback(stdout.trim() === 'active' ? 'running' : 'stopped');
+    });
+}
+
+// Socket.io handling
 io.on('connection', (socket) => {
     console.log('New client connected');
 
@@ -59,6 +75,43 @@ io.on('connection', (socket) => {
         } finally {
             await client.close();
         }
+    });
+
+    // Handle server management commands
+    socket.on('server-control', (action) => {
+        let command;
+        switch (action) {
+            case 'start':
+                command = 'sudo systemctl start minecraft';
+                break;
+            case 'stop':
+                command = 'sudo systemctl stop minecraft';
+                break;
+            case 'restart':
+                command = 'sudo systemctl restart minecraft';
+                break;
+            default:
+                socket.emit('server-control-response', 'Invalid action');
+                return;
+        }
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                socket.emit('server-control-response', `Error: ${stderr}`);
+                return;
+            }
+            socket.emit('server-control-response', `Server action completed: ${stdout}`);
+            // Update status after action
+            getServerStatus(status => {
+                socket.emit('server-status', status);
+            });
+        });
+    });
+
+    // Check server status on connection
+    socket.on('check-server-status', () => {
+        getServerStatus(status => {
+            socket.emit('server-status', status);
+        });
     });
 
     socket.on('disconnect', () => {
