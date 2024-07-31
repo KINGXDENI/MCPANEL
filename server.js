@@ -3,8 +3,12 @@ const http = require('http');
 const socketIo = require('socket.io');
 const fs = require('fs');
 const path = require('path');
-const util = require('minecraft-server-util');
-const { exec } = require('child_process');
+const {
+    RCON
+} = require('minecraft-server-util'); // Import RCON dari minecraft-server-util
+const {
+    exec
+} = require('child_process');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,8 +40,11 @@ io.on('connection', (socket) => {
 
     // Handle RCON command from client
     socket.on('rcon-command', async (command) => {
+        const rcon = new RCON(RCON_HOST, RCON_PORT, RCON_PASSWORD);
         try {
-            const response = await util.rcon(RCON_HOST, RCON_PORT, RCON_PASSWORD, command);
+            await rcon.connect();
+            const response = await rcon.run(command);
+            await rcon.close();
             socket.emit('rcon-response', response);
         } catch (error) {
             socket.emit('rcon-response', `Error: ${error.message}`);
