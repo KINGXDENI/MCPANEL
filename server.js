@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const fs = require('fs');
 const path = require('path');
 const util = require('minecraft-server-util');
+const { exec } = require('child_process');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,12 +19,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
     console.log('New client connected');
 
-    // Send server log to client
-    const logStream = fs.createReadStream('/home/dibo-mc/htdocs/mc.dibo.my.id/logs/latest.log', {
-        encoding: 'utf8'
+    // Send server log to client using tail -f
+    const logStream = exec('tail -f /home/dibo-mc/htdocs/mc.dibo.my.id/logs/latest.log');
+
+    logStream.stdout.on('data', (data) => {
+        socket.emit('server-log', data);
     });
-    logStream.on('data', (chunk) => {
-        socket.emit('server-log', chunk);
+
+    logStream.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    logStream.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
     });
 
     // Handle RCON command from client
