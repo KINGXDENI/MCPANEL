@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start2": "pm2 start node index.js --name mcpanel --exp-backoff-restart-delay=100 && pm2 logs mcpanel"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +13,7 @@
   "dependencies": {
     "express": "^4.19.2",
     "minecraft-server-util": "^5.4.4",
+    "pm2": "^5.4.2",
     "socket.io": "^4.7.5"
   }
 }
