@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
     console.log('New client connected');
 
     // Send server log to client using tail -f
-    const logStream = exec('tail -f /home/dibo-mc/htdocs/mc.dibo.my.id/logs/latest.log');
+    const logStream = exec('sudo tail -f /home/dibo-mc/htdocs/mc.dibo.my.id/logs/latest.log');
 
     logStream.stdout.on('data', (data) => {
         socket.emit('server-log', data);
