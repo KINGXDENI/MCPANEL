@@ -21,8 +21,14 @@
         .log-output {
             white-space: pre-wrap;
             /* Preserve whitespace formatting */
-            overflow-x: auto;
-            /* Allow horizontal scrolling if needed */
+            overflow-y: auto;
+            /* Allow vertical scrolling */
+            max-height: 400px;
+            /* Set a max height for the log area */
+            border: 1px solid #ddd;
+            /* Optional: add border to log area */
+            padding: 10px;
+            /* Optional: add padding inside the log area */
         }
 
         .input-group .form-control {
@@ -61,7 +67,6 @@
                         <i class="fas fa-paper-plane"></i> Send
                     </button>
                 </div>
-                <div id="command-response" class="alert alert-info d-none" role="alert"></div>
             </div>
         </div>
     </div>
@@ -82,15 +87,11 @@
             logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom
         });
 
-        // Show RCON response in server log and alert
+        // Show RCON response in server log
         socket.on('rcon-response', (response) => {
             const logElement = document.getElementById('server-log');
             logElement.textContent += `\n${response}\n`;
             logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom
-
-            const responseElement = document.getElementById('command-response');
-            responseElement.textContent = response;
-            responseElement.classList.remove('d-none'); // Show the alert
         });
 
         function sendCommand() {
