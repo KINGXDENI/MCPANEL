@@ -1,0 +1,17 @@
+{
+  "name": "mcpanel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "minecraft-server-util": "^5.4.4",
+    "socket.io": "^4.7.5"
+  }
+}

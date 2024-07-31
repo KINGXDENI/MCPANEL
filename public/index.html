@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server Dashboard</title>
+</head>
+
+<body>
+    <h1>Minecraft Server Dashboard</h1>
+    <h2>Server Log</h2>
+    <pre id="server-log"></pre>
+    <h2>Send RCON Command</h2>
+    <input type="text" id="command-input" placeholder="Enter command">
+    <button onclick="sendCommand()">Send</button>
+    <pre id="command-response"></pre>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('server-log', (log) => {
+            document.getElementById('server-log').textContent += log;
+        });
+
+        socket.on('rcon-response', (response) => {
+            document.getElementById('command-response').textContent = response;
+        });
+
+        function sendCommand() {
+            const command = document.getElementById('command-input').value;
+            socket.emit('rcon-command', command);
+        }
+    </script>
+</body>
+
+</html>

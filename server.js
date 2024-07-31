@@ -1,0 +1,47 @@
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const fs = require('fs');
+const path = require('path');
+const util = require('minecraft-server-util');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+const RCON_HOST = 'localhost';
+const RCON_PORT = 25575;
+const RCON_PASSWORD = 'your-rcon-password';
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+io.on('connection', (socket) => {
+    console.log('New client connected');
+
+    // Send server log to client
+    const logStream = fs.createReadStream('/home/dibo-mc/htdocs/mc.dibo.my.id/logs/latest.log', {
+        encoding: 'utf8'
+    });
+    logStream.on('data', (chunk) => {
+        socket.emit('server-log', chunk);
+    });
+
+    // Handle RCON command from client
+    socket.on('rcon-command', async (command) => {
+        try {
+            const response = await util.rcon(RCON_HOST, RCON_PORT, RCON_PASSWORD, command);
+            socket.emit('rcon-response', response);
+        } catch (error) {
+            socket.emit('rcon-response', `Error: ${error.message}`);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
